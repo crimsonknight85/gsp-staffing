@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Warm Earthy Palette - inspired by Design 1 & 2 */
+    --background: 36 25% 94%; /* Warm cream #F3EFE6 */
+    --foreground: 24 18% 15%; /* Dark brown #2C2419 */
+    --card: 36 20% 96%; /* Lighter cream #F7F4EE */
+    --card-foreground: 24 18% 15%;
+    --popover: 36 20% 96%;
+    --popover-foreground: 24 18% 15%;
+    --primary: 24 18% 15%; /* Dark brown */
+    --primary-foreground: 36 25% 94%; /* Cream */
+    --secondary: 30 15% 88%; /* Warm taupe #E5DDD2 */
+    --secondary-foreground: 24 18% 15%;
+    --muted: 30 15% 88%;
+    --muted-foreground: 24 10% 40%;
+    --accent: 25 30% 42%; /* Warm coffee brown #8B6B4A */
+    --accent-foreground: 0 0% 100%;
+    --destructive: 4 61% 46%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 30 12% 80%;
+    --input: 30 12% 80%;
+    --ring: 25 30% 42%;
+    --radius: 0.625rem;
+    --sidebar-background: 36 20% 96%;
+    --sidebar-foreground: 24 18% 15%;
+    --sidebar-primary: 25 30% 42%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 30 15% 88%;
+    --sidebar-accent-foreground: 24 18% 15%;
+    --sidebar-border: 30 12% 80%;
+    --sidebar-ring: 25 30% 42%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-sans font-bold tracking-tight;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
