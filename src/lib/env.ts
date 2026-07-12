@@ -1,6 +1,9 @@
 /**
- * Environment-variable validation.
- * Throws at build/start time if required public env vars are missing or malformed.
+ * Server-side environment-variable validation.
+ *
+ * NOTE: This file is for SERVER-ONLY code (server.ts, middleware.ts).
+ * Client code (client.ts) uses direct static process.env.NEXT_PUBLIC_*
+ * access so Next.js can inline those values into the browser bundle.
  */
 
 const URL_PATTERN = /^https?:\/\/.+/;

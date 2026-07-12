@@ -64,14 +64,15 @@ function SignInForm({
     setLoading(true);
     setError(null);
 
-    const supabase = createClient();
-
     // Race the Supabase call against a timeout so the form can't hang forever
     const timeout = new Promise<never>((_, reject) =>
       setTimeout(() => reject(new Error("TIMEOUT")), 15000),
     );
 
     try {
+      // createClient() can throw if env vars are missing/misconfigured
+      const supabase = createClient();
+
       const { error: signInError } = (await Promise.race([
         supabase.auth.signInWithPassword({ email, password }),
         timeout,
