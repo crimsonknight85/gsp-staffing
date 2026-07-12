@@ -9,26 +9,33 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/logo";
 import { createClient } from "@/lib/supabase/client";
-import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
+import {
+  Loader2,
+  AlertCircle,
+  Lock,
+  Check,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 
 export default function OnboardingPage() {
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [fullName, setFullName] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSetup = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
 
     if (password.length < 8) {
       setError("Password must be at least 8 characters.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
       return;
     }
 
@@ -36,41 +43,44 @@ export default function OnboardingPage() {
     setError(null);
 
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
-      // Not logged in — they need to click the invite link in their email first
-      setError("Please use the link in your invitation email to set up your account.");
+      setError(
+        "Your session has expired. Please use the link from your email again.",
+      );
       setLoading(false);
       return;
     }
 
-    // Update password
-    const { error: pwError } = await supabase.auth.updateUser({ password });
-    if (pwError) {
-      setError(pwError.message);
+    const { error: updateError } = await supabase.auth.updateUser({
+      password,
+    });
+
+    if (updateError) {
+      setError(updateError.message);
       setLoading(false);
       return;
     }
 
-    // Update name if provided
-    if (fullName) {
-      await supabase.from("profiles").update({ full_name: fullName }).eq("id", user.id);
-    }
-
-    setLoading(false);
-    router.push("/dashboard");
+    // Success — go to dashboard
     router.refresh();
+    router.push("/dashboard");
   };
+
+  // Password strength indicators
+  const hasLength = password.length >= 8;
+  const hasUpper = /[A-Z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
 
   return (
     <section className="flex flex-1 items-center justify-center bg-card px-4 py-16">
       <div className="w-full max-w-md">
         <div className="mb-8 flex flex-col items-center gap-4">
           <Logo />
-          <p className="text-sm text-muted-foreground">
-            Set up your account
-          </p>
+          <p className="text-sm text-muted-foreground">Set your password</p>
         </div>
 
         <Card className="border-border">
@@ -80,53 +90,116 @@ export default function OnboardingPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSetup} className="space-y-4" noValidate>
-              <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name</Label>
-                <Input
-                  id="fullName"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Your name"
-                />
-              </div>
+            <form onSubmit={handleSubmit} className="space-y-4" noValidate>
               <div className="space-y-2">
                 <Label htmlFor="password">
-                  Set Password <span className="text-gsp-danger">*</span>
+                  New Password{" "}
+                  <span className="text-gsp-danger" aria-hidden="true">
+                    *
+                  </span>
                 </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={8}
-                  autoComplete="new-password"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Minimum 8 characters
-                </p>
+                <div className="relative">
+                  <Lock
+                    className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                    aria-hidden="true"
+                  />
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (error) setError(null);
+                    }}
+                    required
+                    minLength={8}
+                    autoComplete="new-password"
+                    className="pl-9 pr-9"
+                    aria-describedby="password-requirements"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-gsp-navy"
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+                <ul
+                  id="password-requirements"
+                  className="mt-2 space-y-1"
+                  role="list"
+                >
+                  <li
+                    className={`flex items-center gap-1.5 text-xs ${
+                      hasLength ? "text-gsp-success" : "text-muted-foreground"
+                    }`}
+                  >
+                    <Check className="h-3 w-3" aria-hidden="true" />
+                    At least 8 characters
+                  </li>
+                  <li
+                    className={`flex items-center gap-1.5 text-xs ${
+                      hasUpper ? "text-gsp-success" : "text-muted-foreground"
+                    }`}
+                  >
+                    <Check className="h-3 w-3" aria-hidden="true" />
+                    Uppercase letter
+                  </li>
+                  <li
+                    className={`flex items-center gap-1.5 text-xs ${
+                      hasNumber ? "text-gsp-success" : "text-muted-foreground"
+                    }`}
+                  >
+                    <Check className="h-3 w-3" aria-hidden="true" />
+                    Number
+                  </li>
+                </ul>
               </div>
+
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">
-                  Confirm Password <span className="text-gsp-danger">*</span>
+                  Confirm Password{" "}
+                  <span className="text-gsp-danger" aria-hidden="true">
+                    *
+                  </span>
                 </Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  autoComplete="new-password"
-                />
+                <div className="relative">
+                  <Lock
+                    className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                    aria-hidden="true"
+                  />
+                  <Input
+                    id="confirmPassword"
+                    type={showPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => {
+                      setConfirmPassword(e.target.value);
+                      if (error) setError(null);
+                    }}
+                    required
+                    autoComplete="new-password"
+                    className="pl-9"
+                    aria-invalid={!!error}
+                    aria-describedby={error ? "onboarding-error" : undefined}
+                  />
+                </div>
               </div>
 
               {error && (
                 <p
+                  id="onboarding-error"
                   className="text-sm text-gsp-danger flex items-center gap-2"
                   role="alert"
                 >
-                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
                   {error}
                 </p>
               )}
@@ -138,11 +211,14 @@ export default function OnboardingPage() {
               >
                 {loading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Setting up...
+                    <Loader2
+                      className="mr-2 h-4 w-4 animate-spin"
+                      aria-hidden="true"
+                    />
+                    Setting password...
                   </>
                 ) : (
-                  "Complete Setup"
+                  "Complete setup"
                 )}
               </Button>
             </form>
@@ -151,7 +227,10 @@ export default function OnboardingPage() {
 
         <p className="mt-4 text-center text-xs text-muted-foreground">
           Already have an account?{" "}
-          <Link href="/login" className="text-gsp-terracotta underline hover:no-underline">
+          <Link
+            href="/login"
+            className="text-gsp-terracotta underline hover:no-underline"
+          >
             Sign in
           </Link>
         </p>

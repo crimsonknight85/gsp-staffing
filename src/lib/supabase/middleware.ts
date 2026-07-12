@@ -1,65 +1,46 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { getSupabaseConfig } from "@/lib/env";
 
 export async function updateSession(request: NextRequest) {
+  const { supabaseUrl, supabaseAnonKey } = getSupabaseConfig();
+
   let supabaseResponse = NextResponse.next({ request });
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value),
-          );
-          supabaseResponse = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options),
-          );
-        },
+  const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
+      },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) =>
+          request.cookies.set(name, value),
+        );
+        supabaseResponse = NextResponse.next({ request });
+        cookiesToSet.forEach(({ name, value, options }) =>
+          supabaseResponse.cookies.set(name, value, options),
+        );
       },
     },
-  );
+  });
 
+  // Do not run between supabase and getUser — middleware docs require this order.
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
 
-  // Public routes that don't require auth
-  const publicRoutes = [
-    "/",
-    "/services",
-    "/how-it-works",
-    "/for-clients",
-    "/for-applicants",
-    "/for-contractors",
-    "/about",
-    "/contact",
-    "/privacy",
-    "/terms",
-    "/cookies",
-  ];
-
-  const isPublicRoute = publicRoutes.some(
-    (route) => pathname === route || pathname.startsWith(`${route}/`),
-  );
-  const isLoginPage = pathname === "/login";
+  // Routes that require an authenticated session
   const isProtectedRoute =
-    pathname.startsWith("/admin") ||
-    pathname.startsWith("/hr") ||
-    pathname.startsWith("/client") ||
-    pathname.startsWith("/applicant") ||
-    pathname.startsWith("/contractor") ||
-    pathname.startsWith("/finance") ||
+    pathname.startsWith("/dashboard") ||
     pathname.startsWith("/onboarding");
 
-  // Redirect unauthenticated users to login from protected routes
+  // /login and /auth/callback are public but redirect if already logged in
+  const isLoginPage = pathname === "/login";
+  const isAuthCallback = pathname.startsWith("/auth/callback");
+
+  // 1. Unauthenticated → redirect to /login from protected routes
   if (!user && isProtectedRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
@@ -67,15 +48,16 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Redirect authenticated users away from login
+  // 2. Authenticated users hitting /login → go to dashboard
   if (user && isLoginPage) {
-    // We'll redirect to their dashboard after we know their role.
-    // For now, send to a router page that handles role-based redirect.
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     url.searchParams.delete("redirect");
     return NextResponse.redirect(url);
   }
+
+  // 3. Auth callback and onboarding are handled by their own route/page logic
+  if (isAuthCallback) return supabaseResponse;
 
   return supabaseResponse;
 }
