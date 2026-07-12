@@ -65,21 +65,35 @@ function SignInForm({
     setError(null);
 
     const supabase = createClient();
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
 
-    if (signInError) {
-      // Generic message — prevents account enumeration
-      setError("Invalid email or password. Please try again.");
+    // Race the Supabase call against a timeout so the form can't hang forever
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("TIMEOUT")), 15000),
+    );
+
+    try {
+      const { error: signInError } = (await Promise.race([
+        supabase.auth.signInWithPassword({ email, password }),
+        timeout,
+      ])) as Awaited<ReturnType<typeof supabase.auth.signInWithPassword>>;
+
+      if (signInError) {
+        setError("Invalid email or password. Please try again.");
+        setLoading(false);
+        return;
+      }
+
+      // Success — router.refresh() picks up the new cookie from middleware
+      router.refresh();
+      router.push("/dashboard");
+    } catch (err: unknown) {
+      const msg =
+        err instanceof Error && err.message === "TIMEOUT"
+          ? "The request timed out. Please check your connection and try again."
+          : "Unable to connect to the authentication service. Please try again later.";
+      setError(msg);
       setLoading(false);
-      return;
     }
-
-    // Success — router.refresh() picks up the new cookie from middleware
-    router.refresh();
-    router.push("/dashboard");
   };
 
   return (
