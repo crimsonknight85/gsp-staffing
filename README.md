@@ -1,73 +1,27 @@
-# React + TypeScript + Vite
+# Global Staffing Partners Website Guidelines
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This folder is the source of truth for rebuilding the GSP website with Kimi Code and Hermes.
 
-Currently, two official plugins are available:
+## Reading order
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+1. `PROJECT_CONTEXT.md`
+2. `BRAND_AND_CONTENT_GUIDE.md`
+3. `WEBSITE_REQUIREMENTS.md`
+4. `UI_UX_DESIGN_SYSTEM.md`
+5. `MVP_SCOPE_AND_ROADMAP.md`
+6. `USER_ROLES_AND_FLOWS.md`
+7. `DASHBOARD_REQUIREMENTS.md`
+8. `TECH_ARCHITECTURE.md`
+9. `DATABASE_SCHEMA.md`
+10. `SECURITY_RULES.md`
+11. `AI_CODING_INSTRUCTIONS.md`
+12. `QA_AND_DEFINITION_OF_DONE.md`
 
-## React Compiler
+## Conflict priority
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Security rules override technical convenience. MVP scope overrides feature suggestions. Website requirements override mockup assumptions. The current homepage screenshot is a visual reference, not proof that its claims, statistics, addresses, or links are accurate.
 
-## Expanding the ESLint configuration
+## Working rule
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Build and verify one feature at a time. Inspect the repository before changing it. Preserve working behavior. Never invent business facts, social proof, contact information, rates, or performance statistics.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
