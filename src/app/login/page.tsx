@@ -25,6 +25,8 @@ type Mode = "signin" | "forgot" | "reset";
 const CALLBACK_ERRORS: Record<string, string> = {
   auth_callback: "The sign-in link was invalid or expired. Please try again.",
   callback_failed: "Authentication failed. Please try signing in again.",
+  no_role:
+    "Your account is not assigned to any organization yet. Please contact your administrator.",
 };
 
 /* ─────────────────────── Sign In Form ─────────────────────── */

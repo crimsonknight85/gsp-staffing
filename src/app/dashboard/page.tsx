@@ -1,31 +1,21 @@
 import { redirect } from "next/navigation";
-import { getUser } from "@/lib/auth";
-import { DashboardShell, PhasePlaceholder } from "@/components/dashboard-shell";
+import { getUser, getDashboardRoute } from "@/lib/auth";
 
-export const metadata = {
-  title: "Dashboard",
-};
-
-export default async function DashboardPage() {
+/**
+ * Role-based dashboard router.
+ * Redirects authenticated users to their role's dashboard.
+ * Unauthenticated → /login. Authenticated but no role → /login?error=no_role.
+ */
+export default async function DashboardRouterPage() {
   const authUser = await getUser();
 
   if (!authUser) {
     redirect("/login");
   }
 
-  return (
-    <DashboardShell authUser={authUser}>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gsp-navy">Dashboard</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          You&apos;re signed in as {authUser.email}
-        </p>
-      </div>
+  if (!authUser.primaryRole) {
+    redirect("/login?error=no_role");
+  }
 
-      <PhasePlaceholder
-        title="Welcome to GSP"
-        description="Your dashboard is being prepared. Role-specific views, recruitment tools, and contractor management will appear here in future phases. For now, you can verify that your authentication is working."
-      />
-    </DashboardShell>
-  );
+  redirect(getDashboardRoute(authUser.primaryRole));
 }
