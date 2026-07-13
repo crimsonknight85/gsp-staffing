@@ -44,27 +44,30 @@ export async function getUser(): Promise<AuthUser | null> {
 
   const email = user.email ?? "";
 
-  // Fetch profile
+  // Fetch profile (may be null if trigger hasn't fired or RLS blocks it)
   const { data: profile } = await supabase
     .from("profiles")
     .select("id, email, full_name, avatar_url")
     .eq("id", user.id)
     .single();
 
-  // If no profile row yet, return minimal user with empty memberships
-  if (!profile) {
-    return {
-      user,
-      email,
-      profile: { id: user.id, email, full_name: null, avatar_url: null },
-      memberships: [],
-      primaryRole: null,
-      isAdmin: false,
-    };
-  }
+  // Use profile if available, otherwise construct from auth user
+  const resolvedProfile = profile
+    ? {
+        id: profile.id,
+        email: profile.email,
+        full_name: profile.full_name,
+        avatar_url: profile.avatar_url,
+      }
+    : {
+        id: user.id,
+        email,
+        full_name: user.user_metadata?.full_name ?? null,
+        avatar_url: user.user_metadata?.avatar_url ?? null,
+      };
 
-  // Fetch active memberships with org details
-  const { data: memberships } = await supabase
+  // Fetch active memberships with org details — independent of profile existence
+  const { data: memberships, error: membershipError } = await supabase
     .from("organization_memberships")
     .select(
       `
@@ -82,6 +85,11 @@ export async function getUser(): Promise<AuthUser | null> {
     )
     .eq("user_id", user.id)
     .eq("status", "active");
+
+  // Log RLS errors for debugging (server-side only, never exposed to client)
+  if (membershipError) {
+    console.error("[auth] Membership query error:", membershipError.message);
+  }
 
   const typedMemberships: Membership[] = (memberships ?? []).map((m: RawMembership) => {
     const org = m.organizations?.[0];
@@ -106,12 +114,7 @@ export async function getUser(): Promise<AuthUser | null> {
   return {
     user,
     email,
-    profile: {
-      id: profile.id,
-      email: profile.email,
-      full_name: profile.full_name,
-      avatar_url: profile.avatar_url,
-    },
+    profile: resolvedProfile,
     memberships: typedMemberships,
     primaryRole,
     isAdmin: primaryRole === "admin",
