@@ -95,10 +95,18 @@ create index if not exists idx_audit_created on public.audit_events(created_at d
 create index if not exists idx_profiles_email on public.profiles(email);
 
 -- =============================================================
+-- Grants — ensure authenticated role can read base tables
+-- =============================================================
+
+grant usage on schema public to authenticated;
+grant select on public.profiles to authenticated;
+grant select on public.organizations to authenticated;
+grant select on public.organization_memberships to authenticated;
+
+-- =============================================================
 -- Row Level Security
 -- =============================================================
 
--- Enable RLS on all tables
 alter table public.organizations enable row level security;
 alter table public.profiles enable row level security;
 alter table public.organization_memberships enable row level security;
@@ -120,90 +128,86 @@ as $$
   );
 $$;
 
--- ── Helper function: is current user in a specific org? ────
-create or replace function public.is_org_member(org_uuid uuid)
-returns boolean
-language sql
-security definer
-set search_path = public
-as $$
-  select exists (
-    select 1 from organization_memberships
-    where user_id = auth.uid()
-    and organization_id = org_uuid
-    and status = 'active'
-  );
-$$;
-
--- ── Helper function: get user's role in a specific org ─────
-create or replace function public.get_user_role(org_uuid uuid)
-returns membership_role
-language sql
-security definer
-set search_path = public
-as $$
-  select role from organization_memberships
-    where user_id = auth.uid()
-    and organization_id = org_uuid
-    and status = 'active'
-  limit 1;
-$$;
-
 -- ── Profiles policies ──────────────────────────────────────
 drop policy if exists "Profiles: read own or admin" on public.profiles;
 create policy "Profiles: read own or admin"
   on public.profiles for select
+  to authenticated
   using (auth.uid() = id or public.is_admin());
 
 drop policy if exists "Profiles: update own" on public.profiles;
 create policy "Profiles: update own"
   on public.profiles for update
+  to authenticated
   using (auth.uid() = id);
 
--- ── Organizations policies ─────────────────────────────────
-drop policy if exists "Orgs: read member or admin" on public.organizations;
-create policy "Orgs: read member or admin"
-  on public.organizations for select
-  using (public.is_org_member(id) or public.is_admin());
-
 -- ── Memberships policies ───────────────────────────────────
-drop policy if exists "Memberships: read own, org, or admin" on public.organization_memberships;
-create policy "Memberships: read own, org, or admin"
+-- Users can read their own memberships; admins can read all
+drop policy if exists "Memberships: users can read own membership" on public.organization_memberships;
+create policy "Memberships: users can read own membership"
   on public.organization_memberships for select
+  to authenticated
   using (
     user_id = auth.uid()
-    or public.is_org_member(organization_id)
     or public.is_admin()
   );
 
--- Only admins can create/update/delete memberships
+-- Only admins can write memberships
 drop policy if exists "Memberships: admin insert" on public.organization_memberships;
 create policy "Memberships: admin insert"
   on public.organization_memberships for insert
+  to authenticated
   with check (public.is_admin());
 
 drop policy if exists "Memberships: admin update" on public.organization_memberships;
 create policy "Memberships: admin update"
   on public.organization_memberships for update
+  to authenticated
   using (public.is_admin());
 
 drop policy if exists "Memberships: admin delete" on public.organization_memberships;
 create policy "Memberships: admin delete"
   on public.organization_memberships for delete
+  to authenticated
   using (public.is_admin());
+
+-- ── Organizations policies ─────────────────────────────────
+-- Users can see orgs they have an active membership in
+drop policy if exists "Organizations: users can read own organizations" on public.organizations;
+create policy "Organizations: users can read own organizations"
+  on public.organizations for select
+  to authenticated
+  using (
+    exists (
+      select 1
+      from public.organization_memberships m
+      where m.organization_id = organizations.id
+        and m.user_id = auth.uid()
+        and m.status = 'active'
+    )
+    or public.is_admin()
+  );
 
 -- ── Clients policies ───────────────────────────────────────
 drop policy if exists "Clients: read org member or admin" on public.clients;
 create policy "Clients: read org member or admin"
   on public.clients for select
+  to authenticated
   using (
-    public.is_org_member(organization_id)
+    exists (
+      select 1
+      from public.organization_memberships m
+      where m.organization_id = clients.organization_id
+        and m.user_id = auth.uid()
+        and m.status = 'active'
+    )
     or public.is_admin()
   );
 
 drop policy if exists "Clients: admin all" on public.clients;
 create policy "Clients: admin all"
   on public.clients for all
+  to authenticated
   using (public.is_admin())
   with check (public.is_admin());
 
@@ -211,14 +215,22 @@ create policy "Clients: admin all"
 drop policy if exists "Audit: read org member or admin" on public.audit_events;
 create policy "Audit: read org member or admin"
   on public.audit_events for select
+  to authenticated
   using (
-    public.is_org_member(organization_id)
+    exists (
+      select 1
+      from public.organization_memberships m
+      where m.organization_id = audit_events.organization_id
+        and m.user_id = auth.uid()
+        and m.status = 'active'
+    )
     or public.is_admin()
   );
 
 drop policy if exists "Audit: admin insert" on public.audit_events;
 create policy "Audit: admin insert"
   on public.audit_events for insert
+  to authenticated
   with check (public.is_admin());
 
 -- =============================================================
