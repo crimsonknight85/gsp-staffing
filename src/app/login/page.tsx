@@ -332,13 +332,47 @@ function LoginContent() {
   const [prefillEmail, setPrefillEmail] = useState("");
 
   return (
-    <Card className="border-border">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-xl font-semibold text-gsp-navy">
-          {mode === "signin" && "Welcome back"}
-          {mode === "forgot" && "Reset your password"}
-        </CardTitle>
-      </CardHeader>
+    <>
+      {errorParam === "no_role" && (
+        <div
+          className="mb-4 rounded-lg border border-gsp-warning/30 bg-gsp-warning/5 p-4"
+          role="alert"
+        >
+          <div className="flex items-start gap-3">
+            <AlertCircle
+              className="mt-0.5 h-5 w-5 shrink-0 text-gsp-warning"
+              aria-hidden="true"
+            />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-gsp-navy">
+                Account setup incomplete
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {CALLBACK_ERRORS.no_role}
+              </p>
+              <button
+                type="button"
+                onClick={async () => {
+                  const supabase = createClient();
+                  await supabase.auth.signOut();
+                  window.location.href = "/login";
+                }}
+                className="mt-3 text-sm text-gsp-terracotta underline hover:no-underline"
+              >
+                Sign out and try a different account
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <Card className="border-border">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-xl font-semibold text-gsp-navy">
+            {mode === "signin" && "Welcome back"}
+            {mode === "forgot" && "Reset your password"}
+          </CardTitle>
+        </CardHeader>
       <CardContent className="space-y-4">
         {mode === "signin" && (
           <SignInForm
@@ -379,7 +413,8 @@ function LoginContent() {
           to get started.
         </p>
       </CardContent>
-    </Card>
+      </Card>
+    </>
   );
 }
 

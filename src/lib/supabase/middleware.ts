@@ -51,8 +51,10 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // 2. Authenticated users hitting /login → go to dashboard router
-  if (user && isLoginPage) {
+  // 2. Authenticated users hitting /login without error → go to dashboard router.
+  //    If there's an ?error= param (e.g. no_role), let the login page render
+  //    so the user can see the message and sign out — prevents redirect loop.
+  if (user && isLoginPage && !request.nextUrl.searchParams.get("error")) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     url.searchParams.delete("redirect");
