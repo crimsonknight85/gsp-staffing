@@ -7,14 +7,13 @@ const FOOTER_LINKS = {
   pages: [
     { label: "Home", href: "/" },
     { label: "Services", href: "/services" },
-    { label: "How It Works", href: "/how-it-works" },
+    { label: "Jobs", href: "/jobs" },
     { label: "About", href: "/about" },
     { label: "Contact", href: "/contact" },
   ],
   audiences: [
     { label: "For Clients", href: "/for-clients" },
     { label: "For Applicants", href: "/for-applicants" },
-    { label: "For Contractors", href: "/for-contractors" },
   ],
   legal: [
     { label: "Privacy Policy", href: "/privacy" },

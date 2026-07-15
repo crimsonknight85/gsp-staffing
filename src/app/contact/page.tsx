@@ -1,412 +1,208 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Card, CardContent } from "@/components/ui/card";
-import { Mail, CheckCircle2, Loader2, AlertCircle } from "lucide-react";
+import { Logo } from "@/components/logo";
+import { createClient } from "@/lib/supabase/client";
 import { SITE } from "@/lib/utils";
+import {
+  Loader2,
+  AlertCircle,
+  CheckCircle2,
+  Mail,
+  Calendar,
+  ArrowRight,
+} from "lucide-react";
 
-const hiringTimelines = [
-  { value: "immediate", label: "Immediately (within 2 weeks)" },
-  { value: "1-month", label: "Within 1 month" },
-  { value: "1-3-months", label: "Within 1–3 months" },
-  { value: "exploring", label: "Just exploring options" },
-];
+function ContactForm() {
+  const searchParams = useSearchParams();
+  const subject = searchParams.get("subject");
 
-const teamSizes = [
-  { value: "1", label: "1 hire" },
-  { value: "2-5", label: "2–5 hires" },
-  { value: "6-20", label: "6–20 hires" },
-  { value: "20+", label: "20+ hires" },
-];
-
-const servicesNeeded = [
-  { value: "permanent", label: "Permanent Recruitment" },
-  { value: "contract", label: "Contract / Temporary" },
-  { value: "managed", label: "Managed Team" },
-  { value: "not-sure", label: "Not sure yet" },
-];
-
-interface FormErrors {
-  name?: string;
-  email?: string;
-  message?: string;
-  consent?: string;
-}
-
-export default function ContactPage() {
-  const [submitted, setSubmitted] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    company: "",
-    rolesToHire: "",
-    timeline: "",
-    teamSize: "",
-    serviceNeeded: "",
-    message: "",
-    consent: false,
-  });
-
-  const validate = (): boolean => {
-    const newErrors: FormErrors = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = "Your name is required.";
-    }
-    if (!formData.email.trim()) {
-      newErrors.email = "Work email is required.";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address.";
-    }
-    if (!formData.message.trim()) {
-      newErrors.message = "Please tell us a bit about what you need.";
-    }
-    if (!formData.consent) {
-      newErrors.consent = "Please acknowledge the privacy policy to continue.";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  const [name, setName] = useState("");
+  const [company, setCompany] = useState("");
+  const [email, setEmail] = useState("");
+  const [roleNeeded, setRoleNeeded] = useState(subject || "");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validate()) return;
+    if (!name.trim() || !email.trim() || !message.trim()) {
+      setError("Please fill in your name, email, and message.");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
 
-    setSubmitting(true);
+    setLoading(true);
+    setError(null);
 
-    // Placeholder: server action will be wired up in a later step.
-    // Currently demonstrates the form flow without a backend.
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    // Placeholder: no backend yet — simulate submission
+    // This will be wired to a Supabase table or email service later
+    await new Promise((r) => setTimeout(r, 1200));
 
-    setSubmitting(false);
-    setSubmitted(true);
+    setLoading(false);
+    setSuccess(true);
   };
 
-  if (submitted) {
+  if (success) {
     return (
-      <section className="flex flex-1 items-center justify-center bg-card py-20">
-        <div className="mx-auto max-w-lg px-4 text-center sm:px-6">
-          <div className="mb-6 flex justify-center">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gsp-success/10">
-              <CheckCircle2 className="h-10 w-10 text-gsp-success" aria-hidden="true" />
-            </div>
+      <Card className="border-gsp-success/30 bg-gsp-success/5">
+        <CardContent className="p-8 text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gsp-success/10">
+            <CheckCircle2 className="h-6 w-6 text-gsp-success" aria-hidden="true" />
           </div>
-          <h1 className="text-3xl font-bold text-gsp-navy">Thank you!</h1>
-          <p className="mt-4 text-muted-foreground leading-relaxed">
-            We&apos;ve received your message and will get back to you shortly.
-            In the meantime, feel free to explore how our process works.
+          <h2 className="text-lg font-semibold text-gsp-navy">Message sent!</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Thanks, {name}. We&apos;ll get back to you within one business day.
           </p>
-          <div className="mt-8">
-            <a href="/how-it-works">
-              <Button
-                variant="outline"
-                className="border-gsp-navy/20 text-gsp-navy hover:bg-gsp-navy/5"
-              >
-                See How It Works
-              </Button>
-            </a>
-          </div>
-        </div>
-      </section>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Need to talk sooner? Use the booking button to schedule a call directly.
+          </p>
+        </CardContent>
+      </Card>
     );
   }
 
+  return (
+    <Card className="border-border">
+      <CardContent className="p-8">
+        <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+          {subject && (
+            <div className="rounded-lg border border-gsp-terracotta/30 bg-gsp-terracotta/5 p-3">
+              <p className="text-sm text-muted-foreground">
+                Applying for: <strong className="text-gsp-navy">{subject}</strong>
+              </p>
+            </div>
+          )}
+          <div className="grid gap-5 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="name">Name <span className="text-gsp-danger">*</span></Label>
+              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Jane Smith" required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="company">Company</Label>
+              <Input id="company" value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Acme Inc." />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="email">Email <span className="text-gsp-danger">*</span></Label>
+            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="jane@company.com" required />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="roleNeeded">Role needed / Hiring need</Label>
+            <Input id="roleNeeded" value={roleNeeded} onChange={(e) => setRoleNeeded(e.target.value)} placeholder="e.g., Virtual Assistant, Developer" />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="message">Message <span className="text-gsp-danger">*</span></Label>
+            <Textarea
+              id="message"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Tell us about your hiring needs or your experience..."
+              rows={5}
+              required
+            />
+          </div>
+          {error && (
+            <p className="flex items-center gap-2 text-sm text-gsp-danger" role="alert">
+              <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
+              {error}
+            </p>
+          )}
+          <Button type="submit" disabled={loading} className="w-full bg-gsp-terracotta text-white hover:bg-[#7A5E3F] sm:w-auto">
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                Sending...
+              </>
+            ) : (
+              "Send Message"
+            )}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function ContactPage() {
   return (
     <>
       {/* Header */}
       <section className="border-b border-border bg-background py-16 lg:py-20">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-gsp-terracotta">
-            Book a Call
-          </p>
-          <h1 className="text-4xl font-bold text-gsp-navy sm:text-5xl text-balance">
-            Let&apos;s start a conversation
-          </h1>
+          <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-gsp-terracotta">Get in Touch</p>
+          <h1 className="text-4xl font-bold text-gsp-navy sm:text-5xl">Book a Call or Send a Message</h1>
           <p className="mx-auto mt-5 max-w-2xl text-lg text-muted-foreground leading-relaxed">
-            Tell us about your hiring needs. We&apos;ll get back to you with next
-            steps.
+            Tell us what you need or schedule a discovery call — whatever works best for you.
           </p>
         </div>
       </section>
 
-      {/* Form + Contact Info */}
-      <section className="flex-1 bg-card py-16 lg:py-20">
+      {/* Booking + Form */}
+      <section className="bg-card py-16 lg:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-10 lg:grid-cols-3">
-            {/* Contact Info Sidebar */}
+            {/* Booking Sidebar */}
             <div className="lg:col-span-1">
-              <div className="space-y-6">
-                <Card className="border-border">
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-4">
-                      <div
-                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gsp-navy/5"
-                        aria-hidden="true"
-                      >
-                        <Mail className="h-5 w-5 text-gsp-navy" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gsp-navy">Email</p>
-                        <a
-                          href={`mailto:${SITE.email}`}
-                          className="mt-1 block text-sm text-muted-foreground hover:text-gsp-terracotta transition-colors break-all"
-                        >
-                          {SITE.email}
-                        </a>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-border bg-gsp-navy">
-                  <CardContent className="p-6">
-                    <p className="text-sm font-medium text-white">
-                      What happens next
+              {/* Calendly Placeholder — replace with embed when ready */}
+              <Card className="border-gsp-terracotta/30 bg-gsp-terracotta/5">
+                <CardContent className="p-8 text-center">
+                  <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gsp-terracotta/10" aria-hidden="true">
+                    <Calendar className="h-7 w-7 text-gsp-terracotta" />
+                  </div>
+                  <h2 className="text-lg font-semibold text-gsp-navy">Prefer to talk now?</h2>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Book a 30-minute discovery call directly on our calendar.
+                  </p>
+                  <Button
+                    className="mt-6 w-full bg-gsp-terracotta text-white hover:bg-[#7A5E3F]"
+                    onClick={() => {
+                      // TODO: Replace with actual Calendly URL
+                      // window.open('https://calendly.com/your-handle/discovery-call', '_blank');
+                      alert("Calendar booking will be connected soon. For now, please use the form or email us directly.");
+                    }}
+                  >
+                    Book a Call
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                  <div className="mt-6 border-t border-border pt-4">
+                    <p className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                      <Mail className="h-4 w-4 text-gsp-terracotta" aria-hidden="true" />
+                      <a href={`mailto:${SITE.email}`} className="hover:text-gsp-terracotta break-all">
+                        {SITE.email}
+                      </a>
                     </p>
-                    <p className="mt-2 text-sm text-slate-300 leading-relaxed">
-                      After you submit this form, our team reviews your
-                      requirements and reaches out to schedule a call. We listen
-                      first, then recommend the right approach.
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-
-            {/* Form */}
-            <div className="lg:col-span-2">
-              <Card className="border-border">
-                <CardContent className="p-8">
-                  <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-                    {/* Name + Email */}
-                    <div className="grid gap-6 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label htmlFor="name">
-                          Full Name <span className="text-gsp-danger">*</span>
-                        </Label>
-                        <Input
-                          id="name"
-                          value={formData.name}
-                          onChange={(e) =>
-                            setFormData((prev) => ({ ...prev, name: e.target.value }))
-                          }
-                          placeholder="Jane Smith"
-                          required
-                          aria-invalid={!!errors.name}
-                          aria-describedby={errors.name ? "name-error" : undefined}
-                        />
-                        {errors.name && (
-                          <p id="name-error" className="text-xs text-gsp-danger flex items-center gap-1">
-                            <AlertCircle className="h-3 w-3" aria-hidden="true" />
-                            {errors.name}
-                          </p>
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="email">
-                          Work Email <span className="text-gsp-danger">*</span>
-                        </Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          value={formData.email}
-                          onChange={(e) =>
-                            setFormData((prev) => ({ ...prev, email: e.target.value }))
-                          }
-                          placeholder="jane@company.com"
-                          required
-                          aria-invalid={!!errors.email}
-                          aria-describedby={errors.email ? "email-error" : undefined}
-                        />
-                        {errors.email && (
-                          <p id="email-error" className="text-xs text-gsp-danger flex items-center gap-1">
-                            <AlertCircle className="h-3 w-3" aria-hidden="true" />
-                            {errors.email}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Company */}
-                    <div className="space-y-2">
-                      <Label htmlFor="company">Company</Label>
-                      <Input
-                        id="company"
-                        value={formData.company}
-                        onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, company: e.target.value }))
-                        }
-                        placeholder="Acme Inc."
-                      />
-                    </div>
-
-                    {/* Roles to Hire */}
-                    <div className="space-y-2">
-                      <Label htmlFor="roles">Role(s) to Hire</Label>
-                      <Input
-                        id="roles"
-                        value={formData.rolesToHire}
-                        onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, rolesToHire: e.target.value }))
-                        }
-                        placeholder="e.g., Senior Developer, Virtual Assistant, Project Manager"
-                      />
-                    </div>
-
-                    {/* Timeline + Team Size */}
-                    <div className="grid gap-6 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label htmlFor="timeline">Hiring Timeline</Label>
-                        <Select
-                          value={formData.timeline}
-                          onValueChange={(value) =>
-                            setFormData((prev) => ({ ...prev, timeline: value }))
-                          }
-                        >
-                          <SelectTrigger id="timeline">
-                            <SelectValue placeholder="Select timeline" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {hiringTimelines.map((t) => (
-                              <SelectItem key={t.value} value={t.value}>
-                                {t.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="teamSize">Number of Hires</Label>
-                        <Select
-                          value={formData.teamSize}
-                          onValueChange={(value) =>
-                            setFormData((prev) => ({ ...prev, teamSize: value }))
-                          }
-                        >
-                          <SelectTrigger id="teamSize">
-                            <SelectValue placeholder="Select quantity" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {teamSizes.map((s) => (
-                              <SelectItem key={s.value} value={s.value}>
-                                {s.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    {/* Service Type */}
-                    <div className="space-y-2">
-                      <Label htmlFor="service">Service Needed</Label>
-                      <Select
-                        value={formData.serviceNeeded}
-                        onValueChange={(value) =>
-                          setFormData((prev) => ({ ...prev, serviceNeeded: value }))
-                        }
-                      >
-                        <SelectTrigger id="service">
-                          <SelectValue placeholder="Select service" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {servicesNeeded.map((s) => (
-                            <SelectItem key={s.value} value={s.value}>
-                              {s.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Message */}
-                    <div className="space-y-2">
-                      <Label htmlFor="message">
-                        Message <span className="text-gsp-danger">*</span>
-                      </Label>
-                      <Textarea
-                        id="message"
-                        value={formData.message}
-                        onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, message: e.target.value }))
-                        }
-                        placeholder="What roles are you hiring for? Any specific requirements?"
-                        rows={5}
-                        required
-                        aria-invalid={!!errors.message}
-                        aria-describedby={errors.message ? "message-error" : undefined}
-                      />
-                      {errors.message && (
-                        <p id="message-error" className="text-xs text-gsp-danger flex items-center gap-1">
-                          <AlertCircle className="h-3 w-3" aria-hidden="true" />
-                          {errors.message}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Privacy Consent */}
-                    <div className="space-y-2">
-                      <div className="flex items-start gap-3 rounded-lg border border-border bg-background p-4">
-                        <Checkbox
-                          id="consent"
-                          checked={formData.consent}
-                          onCheckedChange={(checked) =>
-                            setFormData((prev) => ({ ...prev, consent: checked === true }))
-                          }
-                          aria-invalid={!!errors.consent}
-                          aria-describedby={errors.consent ? "consent-error" : undefined}
-                        />
-                        <Label htmlFor="consent" className="text-sm leading-relaxed font-normal cursor-pointer">
-                          I agree that Global Staffing Partners may contact me
-                          about my enquiry. I have read and agree to the{" "}
-                          <a href="/privacy" className="text-gsp-terracotta underline hover:no-underline">
-                            Privacy Policy
-                          </a>
-                          .
-                        </Label>
-                      </div>
-                      {errors.consent && (
-                        <p id="consent-error" className="text-xs text-gsp-danger flex items-center gap-1">
-                          <AlertCircle className="h-3 w-3" aria-hidden="true" />
-                          {errors.consent}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Submit */}
-                    <Button
-                      type="submit"
-                      disabled={submitting}
-                      className="w-full bg-gsp-terracotta hover:bg-[#7A5E3F] text-white sm:w-auto"
-                    >
-                      {submitting ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-                          Sending...
-                        </>
-                      ) : (
-                        "Send Message"
-                      )}
-                    </Button>
-                  </form>
+                  </div>
                 </CardContent>
               </Card>
+            </div>
+
+            {/* Contact Form */}
+            <div className="lg:col-span-2">
+              <Suspense
+                fallback={
+                  <Card className="border-border">
+                    <CardContent className="p-8 text-center">
+                      <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
+                    </CardContent>
+                  </Card>
+                }
+              >
+                <ContactForm />
+              </Suspense>
             </div>
           </div>
         </div>
