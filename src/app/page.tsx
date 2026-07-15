@@ -233,9 +233,9 @@ function FinalCTA() {
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
-          <Link href="/jobs">
-            <Button size="lg" className="bg-white text-gsp-navy hover:bg-slate-100 px-8 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5">
-              View Open Jobs
+          <Link href="/services">
+            <Button size="lg" variant="outline" className="border-white/20 text-white hover:bg-white/10 px-8">
+              View Services
             </Button>
           </Link>
         </div>

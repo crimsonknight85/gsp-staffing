@@ -7,13 +7,8 @@ const FOOTER_LINKS = {
   pages: [
     { label: "Home", href: "/" },
     { label: "Services", href: "/services" },
-    { label: "Jobs", href: "/jobs" },
     { label: "About", href: "/about" },
     { label: "Contact", href: "/contact" },
-  ],
-  audiences: [
-    { label: "For Clients", href: "/for-clients" },
-    { label: "For Applicants", href: "/for-applicants" },
   ],
   legal: [
     { label: "Privacy Policy", href: "/privacy" },
@@ -44,25 +39,6 @@ export function PublicFooter() {
             </h2>
             <ul className="space-y-2.5">
               {FOOTER_LINKS.pages.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-slate-400 transition-colors hover:text-gsp-terracotta"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Audiences */}
-          <div>
-            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white">
-              Audiences
-            </h2>
-            <ul className="space-y-2.5">
-              {FOOTER_LINKS.audiences.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
