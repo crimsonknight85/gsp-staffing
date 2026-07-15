@@ -7,6 +7,7 @@ import {
   ShieldCheck,
   ArrowRight,
 } from "lucide-react";
+import { CALENDLY_URL } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "About — Our Mission & Values",
@@ -104,12 +105,12 @@ export default function AboutPage() {
             Book a call and let&apos;s talk about how we can help you build your team.
           </p>
           <div className="mt-10">
-            <Link href="/contact">
+            <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer">
               <Button size="lg" className="bg-gsp-terracotta text-white hover:bg-[#7A5E3F] px-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5">
-                Book a Call
+                Book a Discovery Call
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-            </Link>
+            </a>
           </div>
         </div>
       </section>

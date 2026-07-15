@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/logo";
 import { createClient } from "@/lib/supabase/client";
-import { SITE } from "@/lib/utils";
+import { SITE, CALENDLY_URL } from "@/lib/utils";
 import {
   Loader2,
   AlertCircle,
@@ -170,12 +170,10 @@ export default function ContactPage() {
                   <Button
                     className="mt-6 w-full bg-gsp-terracotta text-white hover:bg-[#7A5E3F]"
                     onClick={() => {
-                      // TODO: Replace with actual Calendly URL
-                      // window.open('https://calendly.com/your-handle/discovery-call', '_blank');
-                      alert("Calendar booking will be connected soon. For now, please use the form or email us directly.");
+                      window.open(CALENDLY_URL, "_blank", "noopener,noreferrer");
                     }}
                   >
-                    Book a Call
+                    Book a Discovery Call
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                   <div className="mt-6 border-t border-border pt-4">

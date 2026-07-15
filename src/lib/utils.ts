@@ -15,6 +15,9 @@ export const SITE = {
   url: "https://globalstaffingpartners.work",
 } as const;
 
+export const CALENDLY_URL =
+  "https://calendly.com/globalstaffingpartners-work/30min";
+
 export const NAV_LINKS = [
   { label: "Services", href: "/services" },
   { label: "About", href: "/about" },

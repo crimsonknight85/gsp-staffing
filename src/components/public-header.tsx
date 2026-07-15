@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
-import { NAV_LINKS } from "@/lib/utils";
+import { NAV_LINKS, CALENDLY_URL } from "@/lib/utils";
 
 export function PublicHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -44,14 +44,14 @@ export function PublicHeader() {
               Log in
             </Button>
           </Link>
-          <Link href="/contact">
+          <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer" className="hidden lg:inline-block">
             <Button
               size="sm"
               className="bg-gsp-terracotta text-white hover:bg-[#7A5E3F] transition-all duration-300 hover:-translate-y-0.5"
             >
               Book a Call
             </Button>
-          </Link>
+          </a>
         </div>
 
         {/* Mobile Toggle */}
@@ -90,11 +90,11 @@ export function PublicHeader() {
                   Log in
                 </Button>
               </Link>
-              <Link href="/contact" onClick={() => setMobileOpen(false)}>
+              <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer" onClick={() => setMobileOpen(false)}>
                 <Button className="w-full justify-center min-h-[44px] bg-gsp-terracotta hover:bg-[#7A5E3F] text-white">
                   Book a Call
                 </Button>
-              </Link>
+              </a>
             </div>
           </div>
         </div>
