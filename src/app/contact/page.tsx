@@ -8,9 +8,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Logo } from "@/components/logo";
-import { createClient } from "@/lib/supabase/client";
-import { SITE, CALENDLY_URL } from "@/lib/utils";
+import { CalendlyEmbed } from "@/components/calendly-embed";
+import { SITE } from "@/lib/utils";
 import {
   Loader2,
   AlertCircle,
@@ -49,7 +48,6 @@ function ContactForm() {
     setError(null);
 
     // Placeholder: no backend yet — simulate submission
-    // This will be wired to a Supabase table or email service later
     await new Promise((r) => setTimeout(r, 1200));
 
     setLoading(false);
@@ -66,9 +64,6 @@ function ContactForm() {
           <h2 className="text-lg font-semibold text-gsp-navy">Message sent!</h2>
           <p className="mt-2 text-sm text-muted-foreground">
             Thanks, {name}. We&apos;ll get back to you within one business day.
-          </p>
-          <p className="mt-3 text-sm text-muted-foreground">
-            Need to talk sooner? Use the booking button to schedule a call directly.
           </p>
         </CardContent>
       </Card>
@@ -101,7 +96,7 @@ function ContactForm() {
             <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="jane@company.com" required />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="roleNeeded">Role needed / Hiring need</Label>
+            <Label htmlFor="roleNeeded">Hiring need / Role needed</Label>
             <Input id="roleNeeded" value={roleNeeded} onChange={(e) => setRoleNeeded(e.target.value)} placeholder="e.g., Virtual Assistant, Developer" />
           </div>
           <div className="space-y-2">
@@ -144,64 +139,64 @@ export default function ContactPage() {
       <section className="border-b border-border bg-background py-16 lg:py-20">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
           <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-gsp-terracotta">Get in Touch</p>
-          <h1 className="text-4xl font-bold text-gsp-navy sm:text-5xl">Book a Call or Send a Message</h1>
+          <h1 className="text-4xl font-bold text-gsp-navy sm:text-5xl">Book a Discovery Call or Send a Message</h1>
           <p className="mx-auto mt-5 max-w-2xl text-lg text-muted-foreground leading-relaxed">
-            Tell us what you need or schedule a discovery call — whatever works best for you.
+            Schedule a call directly on our calendar, or send us a message — whatever works best for you.
           </p>
         </div>
       </section>
 
-      {/* Booking + Form */}
-      <section className="bg-card py-16 lg:py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-10 lg:grid-cols-3">
-            {/* Booking Sidebar */}
-            <div className="lg:col-span-1">
-              {/* Calendly Placeholder — replace with embed when ready */}
-              <Card className="border-gsp-terracotta/30 bg-gsp-terracotta/5">
+      {/* Embedded Calendly Booking */}
+      <section id="book" className="bg-card py-16 lg:py-20 scroll-mt-20">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-8 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gsp-terracotta/10" aria-hidden="true">
+              <Calendar className="h-7 w-7 text-gsp-terracotta" />
+            </div>
+            <h2 className="text-2xl font-bold text-gsp-navy sm:text-3xl">
+              Book a Discovery Call
+            </h2>
+            <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground leading-relaxed">
+              Choose a time that works for you and we&apos;ll discuss your hiring
+              needs, role requirements, timeline, and next steps.
+            </p>
+          </div>
+          <CalendlyEmbed />
+        </div>
+      </section>
+
+      {/* Contact Form */}
+      <section className="bg-background py-16 lg:py-20">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-8 text-center">
+            <h2 className="text-2xl font-bold text-gsp-navy sm:text-3xl">
+              Prefer to send a message?
+            </h2>
+            <p className="mt-3 text-sm text-muted-foreground">
+              Fill out the form below and we&apos;ll get back to you within one business day.
+            </p>
+          </div>
+
+          <Suspense
+            fallback={
+              <Card className="border-border">
                 <CardContent className="p-8 text-center">
-                  <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gsp-terracotta/10" aria-hidden="true">
-                    <Calendar className="h-7 w-7 text-gsp-terracotta" />
-                  </div>
-                  <h2 className="text-lg font-semibold text-gsp-navy">Prefer to talk now?</h2>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Book a 30-minute discovery call directly on our calendar.
-                  </p>
-                  <Button
-                    className="mt-6 w-full bg-gsp-terracotta text-white hover:bg-[#7A5E3F]"
-                    onClick={() => {
-                      window.open(CALENDLY_URL, "_blank", "noopener,noreferrer");
-                    }}
-                  >
-                    Book a Discovery Call
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                  <div className="mt-6 border-t border-border pt-4">
-                    <p className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                      <Mail className="h-4 w-4 text-gsp-terracotta" aria-hidden="true" />
-                      <a href={`mailto:${SITE.email}`} className="hover:text-gsp-terracotta break-all">
-                        {SITE.email}
-                      </a>
-                    </p>
-                  </div>
+                  <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
                 </CardContent>
               </Card>
-            </div>
+            }
+          >
+            <ContactForm />
+          </Suspense>
 
-            {/* Contact Form */}
-            <div className="lg:col-span-2">
-              <Suspense
-                fallback={
-                  <Card className="border-border">
-                    <CardContent className="p-8 text-center">
-                      <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
-                    </CardContent>
-                  </Card>
-                }
-              >
-                <ContactForm />
-              </Suspense>
-            </div>
+          <div className="mt-8 text-center">
+            <p className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+              <Mail className="h-4 w-4 text-gsp-terracotta" aria-hidden="true" />
+              Or email us at{" "}
+              <a href={`mailto:${SITE.email}`} className="text-gsp-terracotta underline hover:no-underline break-all">
+                {SITE.email}
+              </a>
+            </p>
           </div>
         </div>
       </section>

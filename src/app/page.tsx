@@ -15,7 +15,6 @@ import {
   ShieldCheck,
   CheckCircle2,
 } from "lucide-react";
-import { CALENDLY_URL } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Hire Reliable Remote Talent — Recruitment & Managed Staffing",
@@ -48,12 +47,12 @@ function Hero() {
             and accountability.
           </p>
           <div className="mt-10 flex flex-wrap gap-4">
-            <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer">
+            <Link href="/contact#book">
               <Button size="lg" className="bg-gsp-terracotta text-white hover:bg-[#7A5E3F] px-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5">
                 Book a Discovery Call
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-            </a>
+            </Link>
             <Link href="/services">
               <Button size="lg" className="bg-white text-gsp-navy hover:bg-slate-100 px-8 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5">
                 View Services
@@ -228,12 +227,12 @@ function FinalCTA() {
           through how it works.
         </p>
         <div className="mt-10 flex flex-wrap justify-center gap-4">
-          <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer">
+          <Link href="/contact#book">
             <Button size="lg" className="bg-gsp-terracotta text-white hover:bg-[#7A5E3F] px-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5">
               Book a Discovery Call
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-          </a>
+          </Link>
           <Link href="/services">
             <Button size="lg" variant="outline" className="border-white/20 text-white hover:bg-white/10 px-8">
               View Services
