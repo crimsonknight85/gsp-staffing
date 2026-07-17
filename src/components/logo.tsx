@@ -11,6 +11,9 @@ interface LogoProps {
  * GSP official logo.
  * - variant="dark" (default): for light backgrounds — uses transparent primary logo
  * - variant="light": for dark backgrounds — uses white/monochrome version
+ *
+ * Logo aspect ratio is ~3.5:1. Sized at 220x70 intrinsic, then constrained
+ * by CSS: ~34px on mobile, ~40px on small screens, ~44px on desktop.
  */
 export function Logo({ variant = "dark", className }: LogoProps) {
   return (
@@ -26,9 +29,9 @@ export function Logo({ variant = "dark", className }: LogoProps) {
             : "/brand/gsp/gsp-primary-horizontal.png"
         }
         alt="Global Staffing Partners"
-        width={180}
-        height={51}
-        className="h-auto w-auto max-h-[40px] w-auto"
+        width={220}
+        height={70}
+        className="h-[34px] w-auto sm:h-10 md:h-11"
         priority
       />
     </Link>
