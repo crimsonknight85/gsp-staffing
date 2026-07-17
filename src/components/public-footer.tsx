@@ -48,14 +48,6 @@ export function PublicFooter() {
                   </Link>
                 </li>
               ))}
-              <li>
-                <Link
-                  href="/login"
-                  className="text-sm text-slate-400 transition-colors hover:text-gsp-terracotta"
-                >
-                  Log in
-                </Link>
-              </li>
             </ul>
           </div>
 

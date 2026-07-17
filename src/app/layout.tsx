@@ -21,6 +21,16 @@ export const metadata: Metadata = {
     "contractor management",
   ],
   authors: [{ name: SITE.name }],
+  icons: {
+    icon: [
+      { url: "/brand/gsp/gsp-icon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/brand/gsp/gsp-icon-48.png", sizes: "48x48", type: "image/png" },
+      { url: "/brand/gsp/gsp-icon-64.png", sizes: "64x64", type: "image/png" },
+    ],
+    apple: [
+      { url: "/brand/gsp/gsp-icon-64.png", sizes: "64x64", type: "image/png" },
+    ],
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -28,11 +38,20 @@ export const metadata: Metadata = {
     title: `${SITE.name} — Recruitment & Managed Staffing`,
     description: SITE.description,
     siteName: SITE.name,
+    images: [
+      {
+        url: "/brand/gsp/gsp-social-avatar-light.png",
+        width: 1080,
+        height: 1080,
+        alt: SITE.name,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: `${SITE.name} — Recruitment & Managed Staffing`,
     description: SITE.description,
+    images: ["/brand/gsp/gsp-social-avatar-light.png"],
   },
   robots: {
     index: true,

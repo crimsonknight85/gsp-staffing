@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Briefcase } from "lucide-react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 interface LogoProps {
@@ -8,31 +8,29 @@ interface LogoProps {
 }
 
 /**
- * GSP provisional logo — briefcase icon in a rounded square.
- * Designed to be easily replaced when a final logo is approved.
+ * GSP official logo.
+ * - variant="dark" (default): for light backgrounds — uses transparent primary logo
+ * - variant="light": for dark backgrounds — uses white/monochrome version
  */
 export function Logo({ variant = "dark", className }: LogoProps) {
-  const iconBg = variant === "light" ? "bg-white/10" : "bg-gsp-navy";
-  const nameColor = variant === "light" ? "text-white" : "text-gsp-navy";
-
   return (
     <Link
       href="/"
-      className={cn("flex items-center gap-2.5 rounded-md", className)}
+      className={cn("flex items-center rounded-md", className)}
       aria-label="Global Staffing Partners — Home"
     >
-      <div className={cn("flex h-9 w-9 items-center justify-center rounded-lg", iconBg)}>
-        <Briefcase className="h-5 w-5 text-white" aria-hidden="true" />
-      </div>
-      <span className="sr-only">Global Staffing Partners</span>
-      <span className="flex flex-col" aria-hidden="true">
-        <span className={cn("text-sm font-bold leading-tight tracking-tight", nameColor)}>
-          Global Staffing
-        </span>
-        <span className="text-[10px] font-medium leading-tight uppercase tracking-widest text-gsp-terracotta">
-          Partners
-        </span>
-      </span>
+      <Image
+        src={
+          variant === "light"
+            ? "/brand/gsp/gsp-primary-horizontal-white.png"
+            : "/brand/gsp/gsp-primary-horizontal.png"
+        }
+        alt="Global Staffing Partners"
+        width={180}
+        height={51}
+        className="h-auto w-auto max-h-[40px] w-auto"
+        priority
+      />
     </Link>
   );
 }

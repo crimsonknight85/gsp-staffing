@@ -37,13 +37,8 @@ export function PublicHeader() {
           ))}
         </div>
 
-        {/* Desktop Auth + CTA */}
+        {/* Desktop CTA */}
         <div className="hidden items-center gap-3 lg:flex">
-          <Link href="/login">
-            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gsp-navy">
-              Log in
-            </Button>
-          </Link>
           <Link href="/contact#book" className="hidden lg:inline-block">
             <Button
               size="sm"
@@ -85,11 +80,6 @@ export function PublicHeader() {
               </Link>
             ))}
             <div className="mt-3 flex flex-col gap-2 border-t border-border pt-3">
-              <Link href="/login" onClick={() => setMobileOpen(false)}>
-                <Button variant="outline" className="w-full justify-center min-h-[44px]">
-                  Log in
-                </Button>
-              </Link>
               <Link href="/contact#book" onClick={() => setMobileOpen(false)}>
                 <Button className="w-full justify-center min-h-[44px] bg-gsp-terracotta hover:bg-[#7A5E3F] text-white">
                   Book a Call
